@@ -199,6 +199,10 @@ SCENARIO_MAP = {
 
 last_timeing = []
 
+def boolean_string(s):
+    if s not in {'False', 'True'}:
+        raise ValueError('Not a valid boolean string')
+    return s == 'True'
 
 def get_args():
     """Parse commandline."""
@@ -234,6 +238,10 @@ def get_args():
     parser.add_argument("--count", type=int, help="dataset items to use")
     parser.add_argument("--max-latency", type=float, help="mlperf max latency in pct tile")
     parser.add_argument("--samples-per-query", type=int, help="mlperf multi-stream sample per query")
+
+    # below used for speed up testing process
+    parser.add_argument("--optimize-graph", default=False, type=boolean_string, help="whether to use optimize_for_inference lib")
+
     args = parser.parse_args()
 
     # don't use defaults in argparser. Instead we default to a dict, override that with a profile
@@ -483,7 +491,9 @@ def main():
 
 
     # load model to backend
-    model = backend.load(args.model, inputs=args.inputs, outputs=args.outputs)
+    print("args.optimize_graph", args.optimize_graph)
+    print("type", type(args.optimize_graph))
+    model = backend.load(args.model, inputs=args.inputs, outputs=args.outputs, optimized_graph=args.optimize_graph)
     final_results = {
         "runtime": model.name(),
         "version": model.version(),
