@@ -48,7 +48,6 @@ class BackendTensorflow(backend.Backend):
             graph_def.ParseFromString(f.read())
 
         if optimized_graph:
-            print("here1")
             try:
                 optimized_graph_def = optimize_for_inference(graph_def, [item.split(':')[0] for item in inputs],
                         [item.split(':')[0] for item in outputs], dtypes.float32.as_datatype_enum, False)
@@ -61,7 +60,6 @@ class BackendTensorflow(backend.Backend):
                 except ValueError:
                     g = tf.compat.v1.import_graph_def(graph_def, name='')
         else:
-            print("here2")
             g = tf.compat.v1.import_graph_def(graph_def, name='')
 
         self.sess = tf.compat.v1.Session(graph=g, config=infer_config)

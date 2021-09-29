@@ -491,8 +491,6 @@ def main():
 
 
     # load model to backend
-    print("args.optimize_graph", args.optimize_graph)
-    print("type", type(args.optimize_graph))
     model = backend.load(args.model, inputs=args.inputs, outputs=args.outputs, optimized_graph=args.optimize_graph)
     final_results = {
         "runtime": model.name(),
