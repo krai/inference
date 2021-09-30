@@ -265,10 +265,10 @@ def get_args():
     return args
 
 
-def get_backend(backend):
+def get_backend(backend, optimize_graph=None):
     if backend == "tensorflow":
         from backend_tf import BackendTensorflow
-        backend = BackendTensorflow()
+        backend = BackendTensorflow(optimize_graph=optimize_graph)
     elif backend == "tensorflowRT":
         from backend_tf_trt import BackendTensorflowRT
         backend = BackendTensorflowRT()
@@ -450,7 +450,7 @@ def main():
     log.info(args)
 
     # find backend
-    backend = get_backend(args.backend)
+    backend = get_backend(args.backend, optimize_graph=args.optimize_graph)
 
     try:
         backend.set_extra_params # trigger AttributeError for unsupporting backends
@@ -491,7 +491,7 @@ def main():
 
 
     # load model to backend
-    model = backend.load(args.model, inputs=args.inputs, outputs=args.outputs, optimized_graph=args.optimize_graph)
+    model = backend.load(args.model, inputs=args.inputs, outputs=args.outputs)
     final_results = {
         "runtime": model.name(),
         "version": model.version(),

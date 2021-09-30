@@ -13,7 +13,8 @@ import backend
 
 
 class BackendTensorflow(backend.Backend):
-    def __init__(self):
+    def __init__(self, optimize_graph=None):
+        self.optimize_graph=optimize_graph
         super(BackendTensorflow, self).__init__()
 
     def version(self):
@@ -26,7 +27,7 @@ class BackendTensorflow(backend.Backend):
         # By default tensorflow uses NHWC (and the cpu implementation only does NHWC)
         return "NHWC"
 
-    def load(self, model_path, inputs=None, outputs=None, optimized_graph=None):
+    def load(self, model_path, inputs=None, outputs=None):
         # there is no input/output meta data i the graph so it need to come from config.
         if not inputs:
             raise ValueError("BackendTensorflow needs inputs")
@@ -47,7 +48,7 @@ class BackendTensorflow(backend.Backend):
         with tf.compat.v1.gfile.FastGFile(model_path, "rb") as f:
             graph_def.ParseFromString(f.read())
 
-        if optimized_graph:
+        if self.optimize_graph:
             try:
                 optimized_graph_def = optimize_for_inference(graph_def, [item.split(':')[0] for item in inputs],
                         [item.split(':')[0] for item in outputs], dtypes.float32.as_datatype_enum, False)
