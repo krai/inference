@@ -287,6 +287,12 @@ def get_backend(backend, optimize_graph=None):
     elif backend == "tflite":
         from backend_tflite import BackendTflite
         backend = BackendTflite()
+    if backend == "openvino-cpu":
+        from backend_tf import BackendTensorflow
+        import openvino_tensorflow as ovtf
+        ovtf.list_backends()
+        ovtf.set_backend('CPU')
+        backend = BackendTensorflow(optimize_graph=optimize_graph)
     else:
         raise ValueError("unknown backend: " + backend)
     return backend

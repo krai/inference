@@ -1,0 +1,10 @@
+{
+  "data_uoa": "inference",
+  "data_uid": "f6591844bcdd4deb",
+  "data_alias": "inference",
+  "data_name": "inference",
+  "dict": {
+    "shared": "git",
+    "url": "https://github.com/krai/inference.git"
+  }
+}
