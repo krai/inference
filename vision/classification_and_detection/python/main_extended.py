@@ -290,7 +290,6 @@ def get_backend(backend, optimize_graph=None):
     if backend == "openvino-cpu":
         from backend_tf import BackendTensorflow
         import openvino_tensorflow as ovtf
-        ovtf.list_backends()
         ovtf.set_backend('CPU')
         backend = BackendTensorflow(optimize_graph=optimize_graph)
     else:
