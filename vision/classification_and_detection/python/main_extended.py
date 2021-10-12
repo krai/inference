@@ -72,7 +72,7 @@ SUPPORTED_DATASETS = {
 SUPPORTED_PROFILES = {
     "defaults": {
         "dataset": "imagenet",
-        "backend": "tensorflow",
+        "inference_engine": "tensorflow",
         "cache": 0,
         "max-batchsize": 32,
     },
@@ -81,25 +81,25 @@ SUPPORTED_PROFILES = {
         "inputs": "image_tensor:0",
         "outputs": "num_detections:0,detection_boxes:0,detection_scores:0,detection_classes:0",
         "dataset": "coco-standard",
-        "backend": "tensorflow",
+        "inference_engine": "tensorflow",
     },
     "default_tf_trt_object_det_zoo": {
         "inputs": "import/image_tensor:0",
         "outputs": "import/num_detections:0,import/detection_boxes:0,import/detection_scores:0,import/detection_classes:0",
         "dataset": "coco-standard",
-        "backend": "tensorflowRT",
+        "inference_engine_backend": "tensorflowRT",
     },
     "tf_yolo": {
         "inputs": "input/input_data:0",
         "outputs": "pred_sbbox/concat_2:0,pred_mbbox/concat_2:0,pred_lbbox/concat_2:0",
         "dataset": "coco-yolo",
-        "backend": "tensorflow",
+        "inference_engine": "tensorflow",
     },
     "tf_yolo_trt": {
         "inputs": "import/input/input_data:0",
         "outputs": "import/pred_sbbox/concat_2:0,import/pred_mbbox/concat_2:0,import/pred_lbbox/concat_2:0",
         "dataset": "coco-yolo",
-        "backend": "tensorflowRT",
+        "inference_engine_backend": "tensorflowRT",
     },
 
     # resnet
@@ -107,13 +107,13 @@ SUPPORTED_PROFILES = {
         "inputs": "input_tensor:0",
         "outputs": "ArgMax:0",
         "dataset": "imagenet",
-        "backend": "tensorflow",
+        "inference_engine": "tensorflow",
         "model-name": "resnet50",
     },
     "resnet50-onnxruntime": {
         "dataset": "imagenet",
         "outputs": "ArgMax:0",
-        "backend": "onnxruntime",
+        "inference_engine": "onnxruntime",
         "model-name": "resnet50",
     },
 
@@ -122,13 +122,13 @@ SUPPORTED_PROFILES = {
         "inputs": "input:0",
         "outputs": "MobilenetV1/Predictions/Reshape_1:0",
         "dataset": "imagenet_mobilenet",
-        "backend": "tensorflow",
+        "inference_engine": "tensorflow",
         "model-name": "mobilenet",
     },
     "mobilenet-onnxruntime": {
         "dataset": "imagenet_mobilenet",
         "outputs": "MobilenetV1/Predictions/Reshape_1:0",
-        "backend": "onnxruntime",
+        "inference_engine": "onnxruntime",
         "model-name": "mobilenet",
     },
 
@@ -137,20 +137,20 @@ SUPPORTED_PROFILES = {
         "inputs": "image_tensor:0",
         "outputs": "num_detections:0,detection_boxes:0,detection_scores:0,detection_classes:0",
         "dataset": "coco-300",
-        "backend": "tensorflow",
+        "inference_engine": "tensorflow",
         "model-name": "ssd-mobilenet",
     },
     "ssd-mobilenet-pytorch": {
         "inputs": "image",
         "outputs": "bboxes,labels,scores",
         "dataset": "coco-300-pt",
-        "backend": "pytorch-native",
+        "inference_engine": "pytorch-native",
         "model-name": "ssd-mobilenet",
     },
     "ssd-mobilenet-onnxruntime": {
         "dataset": "coco-300",
         "outputs": "num_detections:0,detection_boxes:0,detection_scores:0,detection_classes:0",
-        "backend": "onnxruntime",
+        "inference_engine": "onnxruntime",
         "data-format": "NHWC",
         "model-name": "ssd-mobilenet",
     },
@@ -160,7 +160,7 @@ SUPPORTED_PROFILES = {
         "inputs": "image:0",
         "outputs": "detection_bboxes:0,detection_classes:0,detection_scores:0",
         "dataset": "coco-1200-tf",
-        "backend": "tensorflow",
+        "inference_engine": "tensorflow",
         "data-format": "NCHW",
         "model-name": "ssd-resnet34",
     },
@@ -168,14 +168,14 @@ SUPPORTED_PROFILES = {
         "inputs": "image",
         "outputs": "bboxes,labels,scores",
         "dataset": "coco-1200-pt",
-        "backend": "pytorch-native",
+        "inference_engine": "pytorch-native",
         "model-name": "ssd-resnet34",
     },
     "ssd-resnet34-onnxruntime": {
         "dataset": "coco-1200-onnx",
         "inputs": "image",
         "outputs": "bboxes,labels,scores",
-        "backend": "onnxruntime",
+        "inference_engine": "onnxruntime",
         "data-format": "NCHW",
         "max-batchsize": 1,
         "model-name": "ssd-resnet34",
@@ -184,7 +184,7 @@ SUPPORTED_PROFILES = {
         "dataset": "coco-1200-tf",
         "inputs": "image:0",
         "outputs": "detection_bboxes:0,detection_classes:0,detection_scores:0",
-        "backend": "onnxruntime",
+        "inference_engine": "onnxruntime",
         "data-format": "NHWC",
         "model-name": "ssd-resnet34",
     },
@@ -221,7 +221,8 @@ def get_args():
     parser.add_argument("--output", help="test results")
     parser.add_argument("--inputs", help="model inputs")
     parser.add_argument("--outputs", help="model outputs")
-    parser.add_argument("--backend", help="runtime to use")
+    parser.add_argument("--inference-engine", help="runtime to use")
+    parser.add_argument("--inference-engine-backend", help="runtime to use")
     parser.add_argument("--backend-params", help="a colon-delimited and comma-separated dictionary of backend-specific parameters")
     parser.add_argument("--model-name", help="name of the mlperf model, ie. resnet50")
     parser.add_argument("--threads", default=os.cpu_count(), type=int, help="threads")
@@ -265,35 +266,40 @@ def get_args():
     return args
 
 
-def get_backend(backend, optimize_graph=None):
-    if backend == "tensorflow":
+def get_backend(inference_engine, inference_engine_backend, optimize_graph=None):
+    if inference_engine == "tensorflow" and inference_engine_backend == "default":
         from backend_tf import BackendTensorflow
         backend = BackendTensorflow(optimize_graph=optimize_graph)
-    elif backend == "tensorflowRT":
+    elif inference_engine == "tensorflow" and inference_engine_backend == "tensorflowRT":
         from backend_tf_trt import BackendTensorflowRT
         backend = BackendTensorflowRT()
-    elif backend == "onnxruntime":
+    elif inference_engine == "onnxruntime":
         from backend_onnxruntime import BackendOnnxruntime
         backend = BackendOnnxruntime()
-    elif backend == "null":
+    elif inference_engine == "null":
         from backend_null import BackendNull
         backend = BackendNull()
-    elif backend == "pytorch":
+    elif inference_engine == "pytorch":
         from backend_pytorch import BackendPytorch
         backend = BackendPytorch()
-    elif backend == "pytorch-native":
+    elif inference_engine == "pytorch-native":
         from backend_pytorch_native import BackendPytorchNative
         backend = BackendPytorchNative()      
-    elif backend == "tflite":
+    elif inference_engine == "tensorflow" and inference_engine_backend == "tflite":
         from backend_tflite import BackendTflite
         backend = BackendTflite()
-    elif backend == "openvino-cpu":
+    elif inference_engine == "tensorflow" and inference_engine_backend == "openvino-cpu":
         from backend_tf import BackendTensorflow
         import openvino_tensorflow as ovtf
         ovtf.set_backend('CPU')
         backend = BackendTensorflow(optimize_graph=optimize_graph)
+    elif inference_engine == "tensorflow" and inference_engine_backend == "openvino-gpu":
+        from backend_tf import BackendTensorflow
+        import openvino_tensorflow as ovtf
+        ovtf.set_backend('GPU')
+        backend = BackendTensorflow(optimize_graph=optimize_graph)
     else:
-        raise ValueError("unknown backend: " + backend)
+        raise ValueError("unknown inference_engine: " + inference_engine + " and inference_engine_backend:" + inference_engine_backend )
     return backend
 
 
@@ -455,7 +461,7 @@ def main():
     log.info(args)
 
     # find backend
-    backend = get_backend(args.backend, optimize_graph=args.optimize_graph)
+    backend = get_backend(args.inference_engine, args.inference_engine_backend, optimize_graph=args.optimize_graph)
 
     try:
         backend.set_extra_params # trigger AttributeError for unsupporting backends
