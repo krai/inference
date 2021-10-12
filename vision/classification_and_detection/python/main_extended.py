@@ -267,7 +267,7 @@ def get_args():
 
 
 def get_backend(inference_engine, inference_engine_backend, optimize_graph=None):
-    if inference_engine == "tensorflow" and inference_engine_backend == "default":
+    if inference_engine == "tensorflow" and (inference_engine_backend == "default-gpu" or inference_engine_backend == "default-cpu"):
         from backend_tf import BackendTensorflow
         backend = BackendTensorflow(optimize_graph=optimize_graph)
     elif inference_engine == "tensorflow" and inference_engine_backend == "tensorflowRT":
@@ -299,7 +299,7 @@ def get_backend(inference_engine, inference_engine_backend, optimize_graph=None)
         ovtf.set_backend('GPU')
         backend = BackendTensorflow(optimize_graph=optimize_graph)
     else:
-        raise ValueError("unknown inference_engine: " + inference_engine + " and inference_engine_backend:" + inference_engine_backend )
+        raise ValueError("unknown inference_engine: " + inference_engine + "and inference_engine_backend:" + inference_engine_backend )
     return backend
 
 
