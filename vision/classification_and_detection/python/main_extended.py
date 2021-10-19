@@ -459,7 +459,11 @@ def main():
     global last_timeing
     args = get_args()
 
-    log.info(args)
+    # display model name in log
+    format_args = args
+    model_name = format_args.model.split("/")[-2].split("-")[5:]
+    format_args.model_name = '-'.join(model_name)
+    log.info(format_args)
 
     # find backend
     backend = get_backend(args.inference_engine, args.inference_engine_backend, optimize_graph=args.optimize_graph)
