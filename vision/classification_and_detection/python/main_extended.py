@@ -238,6 +238,7 @@ def get_args():
     parser.add_argument("--time", type=int, help="time to scan in seconds")
     parser.add_argument("--count", type=int, help="dataset items to use")
     parser.add_argument("--performance-sample-count", type=int, help="performance sample count")
+    parser.add_argument("--max-query-count", type=int, help="max query count")
     parser.add_argument("--max-latency", type=float, help="mlperf max latency in pct tile")
     parser.add_argument("--samples-per-query", type=int, help="mlperf multi-stream sample per query")
 
@@ -578,7 +579,7 @@ def main():
 
     if count_override:
         settings.min_query_count = count
-        settings.max_query_count = count
+        settings.max_query_count = args.max_query_count if args.max_query_count else count
 
     if args.samples_per_query:
         settings.multi_stream_samples_per_query = args.samples_per_query
