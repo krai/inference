@@ -584,6 +584,7 @@ def main():
     if args.samples_per_query:
         settings.multi_stream_samples_per_query = args.samples_per_query
     if args.max_latency:
+        settings.single_stream_expected_latency_ns = int(args.max_latency * NANO_SEC)
         settings.server_target_latency_ns = int(args.max_latency * NANO_SEC)
         settings.multi_stream_target_latency_ns = int(args.max_latency * NANO_SEC)
 
