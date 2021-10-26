@@ -29,6 +29,7 @@ log = logging.getLogger("main")
 
 NANO_SEC = 1e9
 MILLI_SEC = 1000
+MILLI_TO_NANO_SEC = 1e+6
 
 # pylint: disable=missing-docstring
 
@@ -584,7 +585,7 @@ def main():
     if args.samples_per_query:
         settings.multi_stream_samples_per_query = args.samples_per_query
     if args.max_latency:
-        settings.single_stream_expected_latency_ns = int(args.max_latency * NANO_SEC)
+        settings.single_stream_expected_latency_ns = int(args.max_latency * MILLI_TO_NANO_SEC)
         settings.server_target_latency_ns = int(args.max_latency * NANO_SEC)
         settings.multi_stream_target_latency_ns = int(args.max_latency * NANO_SEC)
 
