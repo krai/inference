@@ -239,7 +239,9 @@ def get_args():
     parser.add_argument("--time", type=int, help="time to scan in seconds")
     parser.add_argument("--count", type=int, help="dataset items to use")
     parser.add_argument("--performance-sample-count", type=int, help="performance sample count")
+    parser.add_argument("--query-count", type=int, help="query count")
     parser.add_argument("--max-query-count", type=int, help="max query count")
+    parser.add_argument("--min-query-count", type=int, help="min query count")
     parser.add_argument("--max-latency", type=float, help="mlperf max latency in pct tile")
     parser.add_argument("--samples-per-query", type=int, help="mlperf multi-stream sample per query")
 
@@ -578,9 +580,15 @@ def main():
         settings.server_target_qps = qps
         settings.offline_expected_qps = qps
 
-    if count_override:
-        settings.min_query_count = count
-        settings.max_query_count = args.max_query_count if args.max_query_count else count
+    if args.query_count:
+        settings.min_query_count = args.query_count
+        settings.max_query_count = args.query_count
+
+    # override query_count if max_query_count or min_query_count is given
+    if args.max_query_count:
+        settings.max_query_count = args.max_query_count
+    if args.min_query_count:
+        settings.min_query_count = args.min_query_count
 
     if args.samples_per_query:
         settings.multi_stream_samples_per_query = args.samples_per_query
