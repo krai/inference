@@ -243,6 +243,7 @@ def get_args():
     parser.add_argument("--max-query-count", type=int, help="max query count")
     parser.add_argument("--min-query-count", type=int, help="min query count")
     parser.add_argument("--max-latency", type=float, help="mlperf max latency in pct tile")
+    parser.add_argument("--target-latency", type=float, help="target latency")
     parser.add_argument("--samples-per-query", type=int, help="mlperf multi-stream sample per query")
 
     # below used for speed up testing process
@@ -592,8 +593,11 @@ def main():
 
     if args.samples_per_query:
         settings.multi_stream_samples_per_query = args.samples_per_query
+
+    if args.target_latency:
+        settings.single_stream_expected_latency_ns = int(args.target_latency * MILLI_TO_NANO_SEC)
+
     if args.max_latency:
-        settings.single_stream_expected_latency_ns = int(args.max_latency * MILLI_TO_NANO_SEC)
         settings.server_target_latency_ns = int(args.max_latency * NANO_SEC)
         settings.multi_stream_target_latency_ns = int(args.max_latency * NANO_SEC)
 
