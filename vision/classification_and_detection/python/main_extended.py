@@ -77,12 +77,17 @@ SUPPORTED_PROFILES = {
         "cache": 0,
         "max-batchsize": 32,
     },
-
-    "default_tf_object_det_zoo": {
+    "default_tf1_object_det_zoo": {
         "inputs": "image_tensor:0",
         "outputs": "num_detections:0,detection_boxes:0,detection_scores:0,detection_classes:0",
         "dataset": "coco-standard",
         "inference_engine": "tensorflow",
+    },
+    "default_tf2_object_det_zoo": {
+        "inputs": "image_tensor:0",
+        "outputs": "num_detections,detection_boxes,detection_scores,detection_classes",
+        "dataset": "coco-standard",
+        "inference_engine": "tensorflow2",
     },
     "default_tf_trt_object_det_zoo": {
         "inputs": "import/image_tensor:0",
@@ -276,6 +281,9 @@ def get_backend(inference_engine, inference_engine_backend, optimize_graph=None)
     if inference_engine == "tensorflow" and (inference_engine_backend == "default-gpu" or inference_engine_backend == "default-cpu"):
         from backend_tf import BackendTensorflow
         backend = BackendTensorflow(optimize_graph=optimize_graph)
+    elif inference_engine == "tensorflow2" and (inference_engine_backend == "default-gpu" or inference_engine_backend == "default-cpu"):
+        from backend_tf import BackendTensorflow2
+        backend = BackendTensorflow2(optimize_graph=optimize_graph)
     elif inference_engine == "tensorflow" and inference_engine_backend == "tensorflowRT":
         from backend_tf_trt import BackendTensorflowRT
         backend = BackendTensorflowRT()

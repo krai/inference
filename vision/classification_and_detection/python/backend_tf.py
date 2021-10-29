@@ -43,7 +43,6 @@ class BackendTensorflow(backend.Backend):
                 if 'TF_INTER_OP_PARALLELISM_THREADS' in os.environ else os.cpu_count()
         infer_config.use_per_session_threads = 1
 
-        # TODO: support checkpoint and saved_model formats?
         graph_def = tf.compat.v1.GraphDef()
         with tf.compat.v1.gfile.FastGFile(model_path, "rb") as f:
             graph_def.ParseFromString(f.read())
@@ -64,7 +63,44 @@ class BackendTensorflow(backend.Backend):
             g = tf.compat.v1.import_graph_def(graph_def, name='')
 
         self.sess = tf.compat.v1.Session(graph=g, config=infer_config)
+        print("self.outputs", self.outputs)
+
         return self
 
     def predict(self, feed):
         return self.sess.run(self.outputs, feed_dict=feed)
+
+
+
+class BackendTensorflow2(BackendTensorflow):
+    def load(self, model_path, inputs=None, outputs=None):
+        # there is no input/output meta data i the graph so it need to come from config.
+        if not inputs:
+            raise ValueError("BackendTensorflow needs inputs")
+        if not outputs:
+            raise ValueError("BackendTensorflow needs outputs")
+        self.outputs = outputs
+        self.inputs = inputs
+
+        infer_config = tf.compat.v1.ConfigProto()
+        infer_config.intra_op_parallelism_threads = int(os.environ['TF_INTRA_OP_PARALLELISM_THREADS']) \
+                if 'TF_INTRA_OP_PARALLELISM_THREADS' in os.environ else os.cpu_count()
+        infer_config.inter_op_parallelism_threads = int(os.environ['TF_INTER_OP_PARALLELISM_THREADS']) \
+                if 'TF_INTER_OP_PARALLELISM_THREADS' in os.environ else os.cpu_count()
+        infer_config.use_per_session_threads = 1
+        
+
+        # Convert model path to the following format: "$HOME/CK_TOOLS/$MODEL/saved_model/"
+        model_path = model_path[:-14]
+        # Support TF2 Saved Model format
+        self.model = tf.saved_model.load(model_path)
+        self.model.signatures['serving_default'].output_dtypes
+        self.model.signatures['serving_default'].output_shapes
+        return self
+
+    def predict(self, feed):
+        key = list(feed)[0]
+        input_tensor = tf.convert_to_tensor(feed[key])
+        output = self.model(input_tensor)
+        predictions = [output[key] for key in self.outputs]
+        return predictions
