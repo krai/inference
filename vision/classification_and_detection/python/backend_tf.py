@@ -72,7 +72,10 @@ class BackendTensorflow(backend.Backend):
 
 
 
-class BackendTensorflow2(BackendTensorflow):
+class BackendTensorflow_SavedModelFormat(BackendTensorflow):
+    def __init__(self):
+        super(BackendTensorflow, self).__init__()
+        
     def load(self, model_path, inputs=None, outputs=None):
         # there is no input/output meta data i the graph so it need to come from config.
         if not inputs:

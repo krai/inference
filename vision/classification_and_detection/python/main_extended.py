@@ -77,17 +77,19 @@ SUPPORTED_PROFILES = {
         "cache": 0,
         "max-batchsize": 32,
     },
-    "default_tf1_object_det_zoo": {
+    "tf1_object_det_zoo": {
         "inputs": "image_tensor:0",
         "outputs": "num_detections:0,detection_boxes:0,detection_scores:0,detection_classes:0",
         "dataset": "coco-standard",
         "inference_engine": "tensorflow",
+        "model_format": "protobuf",
     },
-    "default_tf2_object_det_zoo": {
+    "tf2_object_det_zoo": {
         "inputs": "image_tensor:0",
         "outputs": "num_detections,detection_boxes,detection_scores,detection_classes",
         "dataset": "coco-standard",
-        "inference_engine": "tensorflow2",
+        "inference_engine": "tensorflow",
+        "model_format": "saved_model",
     },
     "default_tf_trt_object_det_zoo": {
         "inputs": "import/image_tensor:0",
@@ -231,6 +233,7 @@ def get_args():
     parser.add_argument("--inference-engine-backend", help="runtime to use")
     parser.add_argument("--backend-params", help="a colon-delimited and comma-separated dictionary of backend-specific parameters")
     parser.add_argument("--model-name", help="name of the mlperf model, ie. resnet50")
+    parser.add_argument("--model-format", help="format of the tensorflow model, ie. protobuf or saved_model")
     parser.add_argument("--threads", default=os.cpu_count(), type=int, help="threads")
     parser.add_argument("--qps", type=int, help="target qps")
     parser.add_argument("--cache", type=int, default=0, help="use cache")
@@ -277,13 +280,14 @@ def get_args():
     return args
 
 
-def get_backend(inference_engine, inference_engine_backend, optimize_graph=None):
+def get_backend(inference_engine, inference_engine_backend, optimize_graph=None, model_format=None):
     if inference_engine == "tensorflow" and (inference_engine_backend == "default-gpu" or inference_engine_backend == "default-cpu"):
-        from backend_tf import BackendTensorflow
-        backend = BackendTensorflow(optimize_graph=optimize_graph)
-    elif inference_engine == "tensorflow2" and (inference_engine_backend == "default-gpu" or inference_engine_backend == "default-cpu"):
-        from backend_tf import BackendTensorflow2
-        backend = BackendTensorflow2(optimize_graph=optimize_graph)
+        if model_format == "protobuf":
+            from backend_tf import BackendTensorflow
+            backend = BackendTensorflow(optimize_graph=optimize_graph)
+        else: # model_format == "saved_model":
+            from backend_tf import BackendTensorflow_SavedModelFormat
+            backend = BackendTensorflow_SavedModelFormat()
     elif inference_engine == "tensorflow" and inference_engine_backend == "tensorflowRT":
         from backend_tf_trt import BackendTensorflowRT
         backend = BackendTensorflowRT()
@@ -479,7 +483,7 @@ def main():
     log.info(format_args)
 
     # find backend
-    backend = get_backend(args.inference_engine, args.inference_engine_backend, optimize_graph=args.optimize_graph)
+    backend = get_backend(args.inference_engine, args.inference_engine_backend, optimize_graph=args.optimize_graph, model_format=args.model_format)
 
     try:
         backend.set_extra_params # trigger AttributeError for unsupporting backends
