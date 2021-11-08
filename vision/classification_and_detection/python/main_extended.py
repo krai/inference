@@ -288,9 +288,12 @@ def get_backend(inference_engine, inference_engine_backend, optimize_graph=None,
         else: # model_format == "saved_model":
             from backend_tf import BackendTensorflow_SavedModelFormat
             backend = BackendTensorflow_SavedModelFormat()
-    elif inference_engine == "tensorflow" and inference_engine_backend == "tensorflowRT":
-        from backend_tf_trt import BackendTensorflowRT
-        backend = BackendTensorflowRT()
+    elif inference_engine == "tensorflow" and (inference_engine_backend == "tensorrt-dynamic" or inference_engine_backend == "tensorrt-static"):
+        if model_format == "saved_model":
+            from backend_tf_trt import BackendTensorflowRT
+            backend = BackendTensorflowRT()
+        else:
+            raise ValueError("TensorRT inference engine backend only supports saved model format in TF2")
     elif inference_engine == "onnxruntime":
         from backend_onnxruntime import BackendOnnxruntime
         backend = BackendOnnxruntime()
