@@ -102,6 +102,7 @@ SUPPORTED_PROFILES = {
         "outputs": "pred_sbbox/concat_2:0,pred_mbbox/concat_2:0,pred_lbbox/concat_2:0",
         "dataset": "coco-yolo",
         "inference_engine": "tensorflow",
+        "model_format": "protobuf",
     },
     "tf_yolo_trt": {
         "inputs": "import/input/input_data:0",
