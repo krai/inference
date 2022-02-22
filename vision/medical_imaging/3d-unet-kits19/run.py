@@ -69,7 +69,7 @@ def get_args():
                                      formatter_class=argparse.RawTextHelpFormatter)
 
     parser.add_argument("--backend",
-                        choices=["pytorch", "onnxruntime", "tensorflow"],
+                        choices=["pytorch", "pytorch_checkpoint", "onnxruntime", "tensorflow"],
                         default="pytorch",
                         help="Backend")
     parser.add_argument("--scenario",
@@ -93,7 +93,7 @@ def get_args():
                         help="path to preprocessed data")
     parser.add_argument("--performance_count",
                         type=int,
-                        default=16,
+                        default=None,
                         help="performance count")
     args = parser.parse_args()
     return args
@@ -123,6 +123,8 @@ def main():
     # instantiate SUT as per requested backend; QSL is also instantiated
     if args.backend == "pytorch":
         from pytorch_SUT import get_sut
+    elif args.backend == "pytorch_checkpoint":
+        from pytorch_checkpoint_SUT import get_sut
     elif args.backend == "onnxruntime":
         from onnxruntime_SUT import get_sut
     elif args.backend == "tensorflow":

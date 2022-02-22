@@ -207,13 +207,15 @@ def get_args():
     parser.add_argument("--mlperf_conf", default="../../mlperf.conf", help="mlperf rules config")
     # file for user LoadGen settings such as target QPS
     parser.add_argument("--user_conf", default="user.conf", help="user config for user LoadGen settings such as target QPS")
+    # file for LoadGen audit settings
+    parser.add_argument("--audit_conf", default="audit.config", help="config for LoadGen audit settings")
 
     # below will override mlperf rules compliant settings - don't use for official submission
     parser.add_argument("--time", type=int, help="time to scan in seconds")
     parser.add_argument("--count", type=int, help="dataset items to use")
     parser.add_argument("--performance-sample-count", type=int, help="performance sample count")
     parser.add_argument("--max-latency", type=float, help="mlperf max latency in pct tile")
-    parser.add_argument("--samples-per-query", type=int, help="mlperf multi-stream sample per query")
+    parser.add_argument("--samples-per-query", default=8, type=int, help="mlperf multi-stream samples per query")
     args = parser.parse_args()
 
     # don't use defaults in argparser. Instead we default to a dict, override that with a profile
@@ -459,6 +461,8 @@ def main():
         log.error("{} not found".format(user_conf))
         sys.exit(1)
 
+    audit_config = os.path.abspath(args.audit_conf)
+
     if args.output:
         output_dir = os.path.abspath(args.output)
         os.makedirs(output_dir, exist_ok=True)
@@ -531,7 +535,7 @@ def main():
         settings.multi_stream_samples_per_query = args.samples_per_query
     if args.max_latency:
         settings.server_target_latency_ns = int(args.max_latency * NANO_SEC)
-        settings.multi_stream_target_latency_ns = int(args.max_latency * NANO_SEC)
+        settings.multi_stream_expected_latency_ns = int(args.max_latency * NANO_SEC)
 
     performance_sample_count = args.performance_sample_count if args.performance_sample_count else min(count, 500)
     sut = lg.ConstructSUT(issue_queries, flush_queries, process_latencies)
@@ -541,7 +545,7 @@ def main():
     result_dict = {"good": 0, "total": 0, "scenario": str(scenario)}
     runner.start_run(result_dict, args.accuracy)
 
-    lg.StartTestWithLogSettings(sut, qsl, settings, log_settings)
+    lg.StartTestWithLogSettings(sut, qsl, settings, log_settings, audit_config)
 
     if not last_timeing:
         last_timeing = runner.result_timing

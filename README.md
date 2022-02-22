@@ -14,6 +14,21 @@ Please see the [MLPerf Inference benchmark paper](https://arxiv.org/abs/1911.025
 }
 ```
 
+## MLPerf Inference v2.0 (submission 02/25/2022)
+Use the r2.0 branch (```git checkout r2.0```) if you want to submit or reproduce v2.0 results.
+
+See the individual Readme files in the reference app for details.
+
+| model | reference app | framework | dataset |
+| ---- | ---- | ---- | ---- |
+| resnet50-v1.5 | [vision/classification_and_detection](https://github.com/mlcommons/inference/tree/master/vision/classification_and_detection) | tensorflow, pytorch, onnx | imagenet2012 |
+| ssd-mobilenet 300x300 | [vision/classification_and_detection](https://github.com/mlcommons/inference/tree/master/vision/classification_and_detection) | tensorflow, pytorch, onnx| coco resized to 300x300 | 
+| ssd-resnet34 1200x1200 | [vision/classification_and_detection](https://github.com/mlcommons/inference/tree/master/vision/classification_and_detection) | tensorflow, pytorch, onnx | coco resized to 1200x1200|
+| bert | [language/bert](https://github.com/mlcommons/inference/tree/master/language/bert) | tensorflow, pytorch, onnx | squad-1.1 |
+| dlrm | [recommendation/dlrm](https://github.com/mlcommons/inference/tree/master/recommendation/dlrm/pytorch) | pytorch, tensorflow(?), onnx(?) | Criteo Terabyte |
+| 3d-unet | [vision/medical_imageing/3d-unet-kits19](https://github.com/mlcommons/inference/tree/master/vision/medical_imaging/3d-unet-kits19) | pytorch, tensorflow, onnx | KiTS19 |
+| rnnt | [speech_recognition/rnnt](https://github.com/mlcommons/inference/tree/master/speech_recognition/rnnt) | pytorch | OpenSLR LibriSpeech Corpus |
+
 
 ## MLPerf Inference v1.1 (submission 08/13/2021)
 Use the r1.1 branch (```git checkout r1.1```) if you want to submit or reproduce v1.1 results.
