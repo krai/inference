@@ -282,7 +282,7 @@ def get_args():
 
 
 def get_backend(inference_engine, inference_engine_backend, optimize_graph=None, model_format=None):
-    if inference_engine == "tensorflow" and (inference_engine_backend == "default-gpu" or inference_engine_backend == "default-cpu"):
+    if inference_engine == "tensorflow" and (inference_engine_backend == "default.gpu" or inference_engine_backend == "default.cpu"):
         if model_format == "protobuf":
             from backend_tf import BackendTensorflow
             backend = BackendTensorflow(optimize_graph=optimize_graph)
@@ -310,12 +310,12 @@ def get_backend(inference_engine, inference_engine_backend, optimize_graph=None,
     elif inference_engine == "tensorflow" and inference_engine_backend == "tflite":
         from backend_tflite import BackendTflite
         backend = BackendTflite()
-    elif inference_engine == "tensorflow" and inference_engine_backend == "openvino-cpu":
+    elif inference_engine == "tensorflow" and inference_engine_backend == "openvino.cpu":
         from backend_tf import BackendTensorflow
         import openvino_tensorflow as ovtf
         ovtf.set_backend('CPU')
         backend = BackendTensorflow(optimize_graph=optimize_graph)
-    elif inference_engine == "tensorflow" and inference_engine_backend == "openvino-gpu":
+    elif inference_engine == "tensorflow" and inference_engine_backend == "openvino.gpu":
         from backend_tf import BackendTensorflow
         import openvino_tensorflow as ovtf
         ovtf.set_backend('GPU')
