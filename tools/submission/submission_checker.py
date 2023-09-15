@@ -1710,7 +1710,7 @@ def check_performance_dir(
         if scenario == "SingleStream":
             qps_wo_loadgen_overhead = float(rt["QPS w/o loadgen overhead"])
         sut_name = str(rt["System Under Test (SUT) name: "])
-
+        
     # check if there are any errors in the detailed log
     fname = os.path.join(path, "mlperf_log_detail.txt")
     if not find_error_in_detail_log(config, fname):
@@ -2722,6 +2722,7 @@ def check_results_dir(
                                         ranging_r,
                                         config,
                                     )
+                                    
                                     if not power_is_valid:
                                         is_valid = False
                                         power_metric = 0
@@ -2734,17 +2735,33 @@ def check_results_dir(
                                     is_valid, r, power_metric = False, None, 0
 
                             if is_valid:
-                                results[name] = (
-                                    r
-                                    if r is None or not has_power
-                                    else (
-                                        "{:f} "
-                                        "with "
-                                        "power_metric"
-                                        " = {:f} and power_efficiency (inf/J) = {:f}"
-                                    ).format(r, power_metric, power_efficiency)
-                                )
+                                if r is None or not has_power:
+                                    results[name] = r
+                                elif scenario_fixed is not None:
+                                    if inferred == 0 and scenario_fixed in ["Offline", "Server"]:
+                                        results[name] = (
+                                            "{:f} "
+                                            "with "
+                                            "power_metric"
+                                            " = {:f} and power_efficiency (QPS/W) = {:f}"
+                                        ).format(r, power_metric, power_efficiency)  
+                                    elif inferred == 1 and scenario_fixed in ["Offline"]:
+                                        power_efficiency = r/power_metric
+                                        results[name] = (
+                                            "{:f} "
+                                            "with "
+                                            "power_metric"
+                                            " = {:f} and power_efficiency (inf/J) = {:f}"
+                                        ).format(r, power_metric, power_efficiency)
+                                    else:
+                                        results[name] = (
+                                            "{:f} "
+                                            "with "
+                                            "power_metric"
+                                            " = {:f} and power_efficiency (inf/J) = {:f}"   
+                                        ).format(r, power_metric, power_efficiency)
 
+                            
                                 system_id = submitter + "_" + system_desc
 
                                 key = "power" if power_metric > 0 else "non_power"
